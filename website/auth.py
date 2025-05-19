@@ -20,11 +20,15 @@ def signup():
         if len(email) < 4:
             pass
         elif len(firstName) < 2:
-            pas
-        if password1 != password2:
-            return render_template("signup.html", boolean=True)
-
-        # Add logic to save the user to the database here
+            pass
+        elif password1 != password2:
+            #return render_template("signup.html", boolean=True)
+            pass
+        elif len(password1) < 7:
+            pass
+        else:
+            # Add user to database
+            pass
 
         return render_template("login.html", boolean=False)
     return render_template("signup.html")
