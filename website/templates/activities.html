@@ -1,4 +1,36 @@
-{% extends "base.html" %} {% block title %}Print History{% endblock %} {% block
+{% extends 'base.html' %} {% block title %}Print Logs{% endblock %} {% block
 content %}
-<h1>This is the Print History Page</h1>
+<h2>Printer Logs</h2>
+
+<table
+  class="table table-bordered"
+  id="logTable"
+>
+  <thead>
+    <tr>
+      <th onclick="sortTable(0)">Date</th>
+      <th onclick="sortTable(1)">Model</th>
+      <th>Printer</th>
+      <th>Material</th>
+      <th>Used (g)</th>
+      <th>Layer</th>
+      <th>Status</th>
+      <th>Claimed</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for log in logs %}
+    <tr>
+      <td>{{ log.date_started }}</td>
+      <td>{{ log.model_name }}</td>
+      <td>{{ log.printer_name }}</td>
+      <td>{{ log.material_code }}</td>
+      <td>{{ log.material_used }}</td>
+      <td>{{ log.layer_height }}mm</td>
+      <td>{{ log.status }}</td>
+      <td>{{ log.time_claimed or '-' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}

@@ -1,4 +1,39 @@
-{% extends "base.html" %} {% block title %}Inventory{% endblock %} {% block
+{% extends 'base.html' %} {% block title %}Inventory{% endblock %} {% block
 content %}
-<h1>This is the Inventory Page</h1>
+<h2>Inventory</h2>
+
+<table
+  class="table table-bordered table-hover"
+  id="inventoryTable"
+>
+  <thead>
+    <tr>
+      <th onclick="sortTable(0)">Code</th>
+      <th onclick="sortTable(1)">Type</th>
+      <th onclick="sortTable(2)">Material</th>
+      <th onclick="sortTable(3)">Color</th>
+      <th onclick="sortTable(4)">Size</th>
+      <th onclick="sortTable(5)">Weight</th>
+      <th>QR</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in inventory %}
+    <tr>
+      <td>{{ item.code }}</td>
+      <td>{{ item.type }}</td>
+      <td>{{ item.material }}</td>
+      <td>{{ item.color }}</td>
+      <td>{{ item.size }}</td>
+      <td>{{ item.weight_remaining }}g</td>
+      <td>
+        <img
+          src="{{ url_for('static', filename='qr_codes/' ~ item.qr_filename) }}"
+          width="60"
+        />
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}

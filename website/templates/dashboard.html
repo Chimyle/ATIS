@@ -1,4 +1,69 @@
-{% extends "base.html" %} {% block title %}Dashboard{% endblock %} {% block
+{% extends 'base.html' %} {% block title %}Dashboard{% endblock %} {% block
 content %}
-<h1>This is the Dashboard Page</h1>
+<h2 class="text-center">Dashboard</h2>
+<br />
+<h4>Active Print Jobs</h4>
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>Printer</th>
+      <th>Model</th>
+      <th>Started</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for job in active_jobs %}
+    <tr>
+      <td>{{ job.printer_name }}</td>
+      <td>{{ job.model_name }}</td>
+      <td>{{ job.date_started }} {{ job.time_started }}</td>
+      <td>{{ job.status }}</td>
+      <td>
+        <form
+          method="post"
+          action="{{ url_for('update_status', job_id=job.id) }}"
+        >
+          <button
+            class="btn btn-success"
+            name="status"
+            value="Done"
+          >
+            Done
+          </button>
+          <button
+            class="btn btn-danger"
+            name="status"
+            value="Fail"
+          >
+            Fail
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h4 class="mt-5">Materials Manager</h4>
+<form
+  method="get"
+  action="{{ url_for('views.dashboard') }}"
+  class="mb-4"
+>
+  <input
+    type="text"
+    name="search"
+    class="form-control"
+    placeholder="Search inventory..."
+  />
+</form>
+
+<h4 class="mt-5">Low Stock Materials</h4>
+<ul>
+  {% for item in low_stock %}
+  <li>{{ item.code }} - {{ item.weight_remaining }}g remaining</li>
+  {% endfor %}
+</ul>
 {% endblock %}
