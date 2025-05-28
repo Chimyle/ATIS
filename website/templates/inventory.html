@@ -23,7 +23,7 @@ content %}
       <th onclick="sortTable(4)">Size</th>
       <th onclick="sortTable(5)">Weight</th>
       <th onclick="sortTable(6)">Location</th>
-      <th>QR</th>
+      <th>Actions</th>
     </tr>
   </thead>
   <tbody>
@@ -35,11 +35,20 @@ content %}
       <td>{{ item.color }}</td>
       <td>{{ item.size }}</td>
       <td>{{ item.weight_remaining }}g</td>
+      <td>{{ item.location }}</td>
       <td>
-        <img
-          src="{{ url_for('static', filename='qr_codes/' ~ item.qr_filename) }}"
-          width="60"
-        />
+        <form
+          method="POST"
+          action="{{ url_for('views.delete_item', item_id=item.id) }}"
+          onsubmit="return confirm('Are you sure you want to delete this item?');"
+        >
+          <button
+            type="submit"
+            class="btn btn-danger btn-sm"
+          >
+            Delete
+          </button>
+        </form>
       </td>
     </tr>
     {% endfor %}
@@ -56,7 +65,7 @@ content %}
     <div class="modal-content">
       <form
         method="POST"
-        action="{{ url_for('views.add_item') }}"
+        action="{{ url_for('views.inventory') }}"
       >
         {{ add_item_form.hidden_tag() }}
         <div class="modal-header">
