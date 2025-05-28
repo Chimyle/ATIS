@@ -1,7 +1,15 @@
 {% extends 'base.html' %} {% block title %}Print Logs{% endblock %} {% block
 content %}
-<h2>Printer Logs</h2>
-
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Print Log</h2>
+  <button
+    class="btn btn-success"
+    data-bs-toggle="modal"
+    data-bs-target="#logPrintModal"
+  >
+    Log Print
+  </button>
+</div>
 <table
   class="table table-bordered"
   id="logTable"
@@ -33,4 +41,99 @@ content %}
     {% endfor %}
   </tbody>
 </table>
+<div
+  class="modal fade"
+  id="logPrintModal"
+  tabindex="-1"
+  aria-labelledby="logPrintModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form
+        method="POST"
+        action="{{ url_for('views.log_print') }}"
+      >
+        {{ log_print_form.hidden_tag() }}
+        <div class="modal-header">
+          <h5
+            class="modal-title"
+            id="logPrintModalLabel"
+          >
+            Log New Print
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              {{ log_print_form.date_started.label }} {{
+              log_print_form.date_started(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              {{ log_print_form.time_started.label }} {{
+              log_print_form.time_started(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              {{ log_print_form.model_name.label }} {{
+              log_print_form.model_name(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              {{ log_print_form.printer_id.label }} {{
+              log_print_form.printer_id(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              {{ log_print_form.material_id.label }} {{
+              log_print_form.material_id(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              {{ log_print_form.material_used.label }} {{
+              log_print_form.material_used(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              {{ log_print_form.print_duration.label }} {{
+              log_print_form.print_duration(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              {{ log_print_form.layer_height.label }} {{
+              log_print_form.layer_height(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              {{ log_print_form.nozzle_temp.label }} {{
+              log_print_form.nozzle_temp(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              {{ log_print_form.bed_temp.label }} {{
+              log_print_form.bed_temp(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              {{ log_print_form.chamber_temp.label }} {{
+              log_print_form.chamber_temp(class="form-control") }}
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="submit"
+            class="btn btn-success"
+          >
+            Log Print
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
