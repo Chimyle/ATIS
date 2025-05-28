@@ -86,5 +86,35 @@
       integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
       crossorigin="anonymous"
     ></script>
+    <script>
+      function sortTable(n) {
+        const table = document.querySelector("table");
+        let switching = true,
+          dir = "asc",
+          switchcount = 0;
+        while (switching) {
+          switching = false;
+          const rows = table.rows;
+          for (let i = 1; i < rows.length - 1; i++) {
+            let x = rows[i].getElementsByTagName("TD")[n];
+            let y = rows[i + 1].getElementsByTagName("TD")[n];
+            let shouldSwitch =
+              dir === "asc"
+                ? x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()
+                : x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase();
+            if (shouldSwitch) {
+              rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+              switching = true;
+              switchcount++;
+              break;
+            }
+          }
+          if (switchcount === 0 && dir === "asc") {
+            dir = "desc";
+            switching = true;
+          }
+        }
+      }
+    </script>
   </body>
 </html>
