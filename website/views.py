@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from .forms import AddItemForm, LogPrintForm
-from .models import InventoryItem, PrintLog
-from .utils import generate_unique_code
+from .forms import LogPrintForm, AddFilamentForm, AddResinForm
+from .models import PrintLog, FilamentInventory, ResinInventory
+from .utils import generate_unique_code, generate_resin_code
 from . import db
 
 views = Blueprint('views', __name__)
@@ -13,97 +13,63 @@ def dashboard():
     # ... any other code you have here
     return render_template('dashboard.html', log_print_form=form)
 
-# @views.route('/add_item', methods=['POST'])
-# def add_item():
-#     form = AddItemForm()
-
-#     if form.validate_on_submit():
-#         material = request.form.get("material")
-#         new_material = request.form.get("new_material")
-
-#         color = request.form.get("color")
-#         new_color = request.form.get("new_color")
-
-#         size = request.form.get("size")
-#         weight = request.form.get("approx_weight")
-#         quantity = int(request.form.get("quantity", 1))
-
-#         # Determine actual values
-#         material = new_material.strip() if material == "__new__" and new_material.strip() else material
-#         color = new_color.strip() if color == "__new__" and new_color.strip() else color
-
-#         for _ in range(quantity):
-#             code = generate_unique_code(material, color, size)
-
-#             item = InventoryItem(
-#                 code=code,
-#                 type=form.type.data,
-#                 material=material,
-#                 color=color,
-#                 size=size,
-#                 weight_remaining=weight
-#             )
-
-#             db.session.add(item)
-
-#         db.session.commit()
-#         flash(f"{quantity} item(s) added.", "success")
-
-#     return redirect(url_for("views.inventory"))
-
-
-
-
 @views.route('/inventory', methods=['GET', 'POST'])
 def inventory():
-    form = AddItemForm()
-    materials = db.session.query(InventoryItem.material).distinct().all()
-    colors = db.session.query(InventoryItem.color).distinct().all()
-    # Flatten the list of tuples
-    materials = [m[0] for m in materials]
-    colors = [c[0] for c in colors]
-    form.material.choices = [(m, m) for m in materials] + [("__new__", "Add New")]
-    form.color.choices = [(c, c) for c in colors] + [("__new__", "Add New")]
-    
+    filament_form = AddFilamentForm()
+    resin_form = AddResinForm()
 
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            # Decide material and color values
-            material = form.new_material.data if form.material.data == '__new__' else form.material.data
-            color = form.new_color.data if form.color.data == '__new__' else form.color.data
-            
-            # Add new material/color to DB if needed
-            # if form.material.data == '__new__':
-            #     add_material_to_db(material)
-            # if form.color.data == '__new__':
-            #     add_color_to_db(color)
-            
-            # Prepare other data from form
-            size = form.size.data
-            type_ = form.type.data
-            weight = form.approx_weight.data
-            quantity = form.quantity.data
+    # Material & color choices for filament
+    fmat = db.session.query(FilamentInventory.material).distinct().all()
+    fcol = db.session.query(FilamentInventory.color).distinct().all()
+    fmat = [m[0] for m in fmat]
+    fcol = [c[0] for c in fcol]
 
-            # Generate code, create inventory items, etc
-            # Add to db.session and commit
-            new_item = InventoryItem(
-                code=generate_unique_code(material, color, size),
-                type=type_,
+    rmat = db.session.query(ResinInventory.material).distinct().all()
+    rmat = [m[0] for m in rmat]
+
+    filament_form.material.choices = [(m, m) for m in fmat] + [("__new__", "Add New")]
+    filament_form.color.choices = [(c, c) for c in fcol] + [("__new__", "Add New")]
+    resin_form.material.choices = [(m, m) for m in rmat] + [("__new__", "Add New")]
+
+    if filament_form.validate_on_submit():
+        material = filament_form.new_material.data if filament_form.material.data == '__new__' else filament_form.material.data
+        color = filament_form.new_color.data if filament_form.color.data == '__new__' else filament_form.color.data
+        
+        for _ in range(filament_form.quantity.data):
+            new_item = FilamentInventory(
+                code=generate_unique_code(material, color, filament_form.size.data),
                 material=material,
                 color=color,
-                size=size,
-                weight_remaining=weight,
-                # ... other fields
+                size=filament_form.size.data,
+                weight_remaining=filament_form.approx_weight.data
             )
             db.session.add(new_item)
-            db.session.commit()
+        db.session.commit()
+        flash("Filament added!", "success")
+        return redirect(url_for('views.inventory'))
 
-            flash('Item(s) added!', 'success')
-            return redirect(url_for('views.inventory'))
+    elif resin_form.validate_on_submit():
+        material = resin_form.new_material.data if resin_form.material.data == '__new__' else resin_form.material.data
+        for _ in range(resin_form.quantity.data):
+            new_item = ResinInventory(
+                material=material,
+                material_code=generate_resin_code(material),
+                printer=resin_form.printer.data,
+                date_mfg=resin_form.date_mfg.data,
+                date_expiry=resin_form.date_expiry.data,
+                date_delivered=resin_form.date_delivered.data,
+                date_opened=None,  # Resin items don't have an opened date initially
+                status=resin_form.status.data if resin_form.status.data else 'Sealed',
+            )
+            db.session.add(new_item)
+        db.session.commit()
+        flash("Resin added!", "success")
+        return redirect(url_for('views.inventory'))
 
-    # If GET or form invalid, just render page with form
-    inventory = InventoryItem.query.all()
-    return render_template('inventory.html', inventory=inventory, add_item_form=form)
+    finv = FilamentInventory.query.all()
+    rinv = ResinInventory.query.all()
+    return render_template("inventory.html", finv=finv, rinv=rinv, filament_form=filament_form, resin_form=resin_form)
+
 
 
 @views.route('/log_print', methods=['GET', 'POST'])
@@ -116,9 +82,20 @@ def activities():
     logs = PrintLog.query.order_by(PrintLog.date_started.desc()).all()  # fetch all logs
     return render_template('activities.html', log_print_form=form, print_logs=logs)
 
-@views.route('/delete_item/<int:item_id>', methods=['POST'])
-def delete_item(item_id):
-    item = InventoryItem.query.get_or_404(item_id)
+@views.route('/delete_filament/<int:item_id>', methods=['POST'])
+def delete_filament(item_id):
+    item = FilamentInventory.query.get_or_404(item_id)
+    try:
+        db.session.delete(item)
+        db.session.commit()
+        flash('Item deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Failed to delete item.', 'danger')
+    return redirect(url_for('views.inventory'))
+@views.route('/delete_resin/<int:item_id>', methods=['POST'])
+def delete_resin(item_id):
+    item = ResinInventory.query.get_or_404(item_id)
     try:
         db.session.delete(item)
         db.session.commit()

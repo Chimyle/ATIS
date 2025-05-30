@@ -98,6 +98,22 @@
     </nav>
 
     <div class="container">{% block content %} {% endblock %}</div>
+
+    <div
+      id="flash-container"
+      style="position: fixed; top: 20px; right: 20px; z-index: 1055"
+    >
+      {% with messages = get_flashed_messages(with_categories=true) %} {% for
+      category, message in messages %}
+      <div
+        class="alert alert-{{ category }} fade show"
+        role="alert"
+      >
+        {{ message }}
+      </div>
+      {% endfor %} {% endwith %}
+    </div>
+
     <script
       src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
       integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
@@ -144,5 +160,15 @@
       }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      setTimeout(function () {
+        const flashContainer = document.getElementById("flash-container");
+        if (flashContainer) {
+          flashContainer.style.transition = "opacity 0.5s ease-out";
+          flashContainer.style.opacity = 0;
+          setTimeout(() => flashContainer.remove(), 500);
+        }
+      }, 2000);
+    </script>
   </body>
 </html>

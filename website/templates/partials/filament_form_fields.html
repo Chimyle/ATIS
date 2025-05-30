@@ -1,0 +1,49 @@
+<div class="row g-3">
+  <div class="col-md-6">
+    {{ filament_form.material.label }} {{
+    filament_form.material(class="form-control", id="filamentMaterialSelect") }}
+    <div
+      id="filamentNewMaterialDiv"
+      style="display: none; margin-top: 5px"
+    >
+      {{ filament_form.new_material(class="form-control") }}
+    </div>
+  </div>
+  <div class="col-md-6">
+    {{ filament_form.color.label }} {{ filament_form.color(class="form-control",
+    id="filamentColorSelect") }}
+    <div
+      id="filamentNewColorDiv"
+      style="display: none; margin-top: 5px"
+    >
+      {{ filament_form.new_color(class="form-control") }}
+    </div>
+  </div>
+  <div class="col-md-6">
+    {{ filament_form.size.label }} {{ filament_form.size(class="form-control")
+    }}
+  </div>
+  <div class="col-md-6">
+    {{ filament_form.approx_weight.label }} {{
+    filament_form.approx_weight(class="form-control") }}
+  </div>
+  <div class="col-md-6">
+    {{ filament_form.quantity.label }} {{
+    filament_form.quantity(class="form-control") }}
+  </div>
+</div>
+<div class="modal-footer">
+  <button
+    type="submit"
+    class="btn btn-success"
+  >
+    Add Filament
+  </button>
+  <button
+    type="button"
+    class="btn btn-secondary"
+    data-bs-dismiss="modal"
+  >
+    Cancel
+  </button>
+</div>

@@ -4,15 +4,32 @@ from wtforms.validators import DataRequired, Optional
 from datetime import date, datetime
 
 # Form to add inventory items
-class AddItemForm(FlaskForm):
-    type = SelectField('Type', choices=[('Filament', 'Filament'), ('Resin', 'Resin')], validators=[DataRequired()])
-    material = SelectField('Material', choices=[], validators=[DataRequired()])
+class AddFilamentForm(FlaskForm):
+    material = SelectField('Material', coerce=str, validators=[DataRequired()])
     new_material = StringField('New Material', validators=[Optional()])
-    color = SelectField('Color', choices=[], validators=[DataRequired()])
+    color = SelectField('Color', coerce=str, validators=[DataRequired()])
     new_color = StringField('New Color', validators=[Optional()])
-    size = SelectField('Size', choices=[('1.75mm', '1.75mm'), ('2.85mm', '2.85mm')], validators=[Optional()])
+    size = SelectField('Size', choices=[('1.75mm', '1.75mm'), ('2.85mm', '2.85mm')])
     approx_weight = FloatField('Approx Weight (g)', validators=[DataRequired()])
     quantity = IntegerField('Quantity', default=1, validators=[DataRequired()])
+
+
+class AddResinForm(FlaskForm):
+    material = SelectField('Material', coerce=str, validators=[DataRequired()])
+    new_material = StringField('New Material', validators=[Optional()])
+    printer = StringField('Printer', validators=[DataRequired()])
+    date_mfg = DateField('Date of Manufacture', validators=[DataRequired()])
+    date_expiry = DateField('Date of Expiry', validators=[DataRequired()])
+    date_delivered = DateField('Date Delivered', validators=[DataRequired()])
+    status = SelectField('Status', choices=[
+        ('Sealed', 'Sealed'),
+        ('Opened', 'Opened'),
+        ('In Use', 'In Use'),
+        ('Expired', 'Expired'),
+        ('Damaged', 'Damaged')
+    ], validators=[Optional()])
+    quantity = IntegerField('Quantity', default=1, validators=[DataRequired()])
+
 
 # Form to log 3D prints
 class LogPrintForm(FlaskForm):

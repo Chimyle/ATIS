@@ -1,0 +1,50 @@
+<div class="col-md-6">
+  {{ resin_form.material.label }} {{ resin_form.material(class="form-control",
+  id="resinMaterialSelect") }}
+  <div
+    id="resinNewMaterialDiv"
+    style="display: none; margin-top: 5px"
+  >
+    {{ resin_form.new_material(class="form-control") }}
+  </div>
+</div>
+<div class="col-md-6">
+  {{ resin_form.printer.label }} {{ resin_form.printer(class="form-control") }}
+</div>
+<div class="col-md-6">
+  {{ resin_form.date_mfg.label }} {{ resin_form.date_mfg(class="form-control")
+  }}
+</div>
+<div class="col-md-6">
+  {{ resin_form.date_expiry.label }} {{
+  resin_form.date_expiry(class="form-control") }}
+</div>
+<div class="col-md-6">
+  {{ resin_form.date_delivered.label }} {{
+  resin_form.date_delivered(class="form-control") }}
+</div>
+<div class="col-md-6">
+  {{ resin_form.status.label }} {{ resin_form.status(class="form-control") }}
+</div>
+<div class="col-md-6">
+  {{ resin_form.quantity.label }} {{ resin_form.quantity(class="form-control")
+  }}
+</div>
+<div class="modal-footer">
+  <button
+    type="submit"
+    class="btn btn-success"
+    id="resin-inv-tab"
+    data-bs-toggle="tab"
+    data-bs-target="#resin-inventory"
+  >
+    Add Resin
+  </button>
+  <button
+    type="button"
+    class="btn btn-secondary"
+    data-bs-dismiss="modal"
+  >
+    Cancel
+  </button>
+</div>

@@ -15,7 +15,7 @@ def create_app():
 
     app.register_blueprint(views, url_prefix='/')
 
-    from .models import InventoryItem, PrintLog
+    from .models import PrintLog, FilamentInventory, ResinInventory
     with app.app_context():
         db.create_all()
 

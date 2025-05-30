@@ -1,4 +1,4 @@
-from .models import InventoryItem
+from .models import FilamentInventory, ResinInventory
 
 def shorten_color(color):
     color_map = {
@@ -24,6 +24,11 @@ def generate_unique_code(material, color, size):
     size_code = get_size_code(size)
     base_code = f"{material}{color_code}{size_code}"
 
-    count = InventoryItem.query.filter(InventoryItem.code.like(f"{base_code}%")).count()
+    count = FilamentInventory.query.filter(FilamentInventory.code.like(f"{base_code}%")).count()
     control_number = f"{count + 1:02d}"
     return f"{base_code}{control_number}"
+
+def generate_resin_code(material):
+    base = material[:3].upper()
+    count = ResinInventory.query.count()
+    return f"{base}{count + 1:02d}"
