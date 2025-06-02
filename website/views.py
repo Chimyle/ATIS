@@ -1,11 +1,12 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from datetime import date, datetime
 import pandas as pd
+import os
 from io import BytesIO
 from flask import send_file
 from .forms import LogPrintForm, AddFilamentForm, AddResinForm
 from .models import PrintLog, FilamentInventory, ResinInventory
-from .utils import generate_unique_code, generate_resin_code
+from .utils import generate_unique_code, generate_resin_code, generate_qr_with_label
 from . import db
 
 views = Blueprint('views', __name__)
@@ -72,9 +73,11 @@ def inventory():
                 weight_remaining=filament_form.approx_weight.data
             )
             db.session.add(new_item)
+            generate_qr_with_label(new_item.code)  # ← Generate QR after saving
         db.session.commit()
-        flash("Filament added!", "success")
+        flash("Filament added with QR code!", "success")
         return redirect(url_for('views.inventory'))
+
 
     elif resin_form.validate_on_submit():
         material = resin_form.new_material.data if resin_form.material.data == '__new__' else resin_form.material.data
@@ -90,8 +93,9 @@ def inventory():
                 status=resin_form.status.data if resin_form.status.data else 'Sealed',
             )
             db.session.add(new_item)
+            generate_qr_with_label(new_item.material_code)  # ← Generate QR after saving
         db.session.commit()
-        flash("Resin added!", "success")
+        flash("Resin added with QR code!", "success")
         return redirect(url_for('views.inventory'))
 
     finv = FilamentInventory.query.all()
@@ -129,6 +133,7 @@ def activities():
 @views.route('/delete_filament/<int:item_id>', methods=['POST'])
 def delete_filament(item_id):
     item = FilamentInventory.query.get_or_404(item_id)
+    qr_path = os.path.join("static", "qr_codes", f"{item.code}.png")
     try:
         db.session.delete(item)
         db.session.commit()
@@ -136,10 +141,19 @@ def delete_filament(item_id):
     except Exception as e:
         db.session.rollback()
         flash('Failed to delete item.', 'danger')
+    # Try deleting the QR code image file
+    try:
+        if os.path.exists(qr_path):
+            os.remove(qr_path)
+    except Exception as e:
+        flash(f"Item deleted, but failed to remove QR code: {e}", "warning")
+    else:
+        flash("Item and QR code deleted successfully.", "success")
     return redirect(url_for('views.inventory'))
 @views.route('/delete_resin/<int:item_id>', methods=['POST'])
 def delete_resin(item_id):
     item = ResinInventory.query.get_or_404(item_id)
+    qr_path = os.path.join("static", "qr_codes", f"{item.material_code}.png")
     try:
         db.session.delete(item)
         db.session.commit()
@@ -147,6 +161,14 @@ def delete_resin(item_id):
     except Exception as e:
         db.session.rollback()
         flash('Failed to delete item.', 'danger')
+    # Try deleting the QR code image file
+    try:
+        if os.path.exists(qr_path):
+            os.remove(qr_path)
+    except Exception as e:
+        flash(f"Item deleted, but failed to remove QR code: {e}", "warning")
+    else:
+        flash("Item and QR code deleted successfully.", "success")
     return redirect(url_for('views.inventory'))
 
 @views.route('/delete_log/<int:log_id>', methods=['POST'])
