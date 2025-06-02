@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, request
+from datetime import date, datetime
 from .forms import LogPrintForm, AddFilamentForm, AddResinForm
 from .models import PrintLog, FilamentInventory, ResinInventory
 from .utils import generate_unique_code, generate_resin_code
@@ -10,8 +11,32 @@ views = Blueprint('views', __name__)
 @views.route('/', methods=['GET', 'POST'])
 def dashboard():
     form = LogPrintForm()
-    # ... any other code you have here
-    return render_template('dashboard.html', log_print_form=form)
+    #logs = PrintLog.query.order_by(PrintLog.date_started.desc()).all()  # fetch all logs
+    fmatid = db.session.query(FilamentInventory.id, FilamentInventory.code).all()
+    form.material_code.choices = [(str(item.id), item.code) for item in fmatid]
+
+    if form.validate_on_submit():
+        new_log = PrintLog(
+            date_started=form.date_started.data,
+            time_started=form.time_started.data,
+            model_name=form.model_name.data,
+            printer_name=form.printer_id.data,
+            material_code=form.material_code.data,
+            material_used=form.material_used.data,
+            duration=int(form.print_duration.data),
+            layer_height=form.layer_height.data,
+            nozzle_temp=form.nozzle_temp.data,
+            bed_temp=form.bed_temp.data,
+            chamber_temp=form.chamber_temp.data
+        )
+        db.session.add(new_log)
+        db.session.commit()
+        flash('Print log added successfully!', 'success')
+        return redirect(url_for('views.dashboard'))
+    active_jobs = PrintLog.query.filter_by(status='Active').order_by(PrintLog.date_started.desc()).all()
+    return render_template('dashboard.html', log_print_form=form, active_jobs=active_jobs)
+
+
 
 @views.route('/inventory', methods=['GET', 'POST'])
 def inventory():
@@ -70,17 +95,33 @@ def inventory():
     rinv = ResinInventory.query.all()
     return render_template("inventory.html", finv=finv, rinv=rinv, filament_form=filament_form, resin_form=resin_form)
 
-
-
-@views.route('/log_print', methods=['GET', 'POST'])
-def log_print():
-    return render_template("log_print.html")
-
 @views.route('/activities', methods=['GET', 'POST'])
 def activities():
     form = LogPrintForm()
     logs = PrintLog.query.order_by(PrintLog.date_started.desc()).all()  # fetch all logs
-    return render_template('activities.html', log_print_form=form, print_logs=logs)
+    fmatid = db.session.query(FilamentInventory.id, FilamentInventory.code).all()
+    form.material_code.choices = [(str(item.id), item.code) for item in fmatid]
+
+    if form.validate_on_submit():
+        new_log = PrintLog(
+            date_started=form.date_started.data,
+            time_started=form.time_started.data,
+            model_name=form.model_name.data,
+            printer_name=form.printer_id.data,
+            material_code=form.material_code.data,
+            material_used=form.material_used.data,
+            duration=int(form.print_duration.data),
+            layer_height=form.layer_height.data,
+            nozzle_temp=form.nozzle_temp.data,
+            bed_temp=form.bed_temp.data,
+            chamber_temp=form.chamber_temp.data
+        )
+        db.session.add(new_log)
+        db.session.commit()
+        flash('Print log added successfully!', 'success')
+        return redirect(url_for('views.activities'))
+    logs = PrintLog.query.order_by(PrintLog.date_started.desc()).all()
+    return render_template('activities.html', log_print_form=form, logs=logs)
 
 @views.route('/delete_filament/<int:item_id>', methods=['POST'])
 def delete_filament(item_id):
@@ -104,3 +145,39 @@ def delete_resin(item_id):
         db.session.rollback()
         flash('Failed to delete item.', 'danger')
     return redirect(url_for('views.inventory'))
+
+@views.route('/delete_log/<int:log_id>', methods=['POST'])
+def delete_log(log_id):
+    log = PrintLog.query.get_or_404(log_id)
+    db.session.delete(log)
+    db.session.commit()
+    flash(f'Log for "{log.model_name}" has been deleted.', 'success')
+    return redirect(url_for('views.activities'))
+
+@views.route('/update_status/<int:job_id>', methods=['POST'])
+def update_status(job_id):
+    job = PrintLog.query.get_or_404(job_id)
+    new_status = request.form.get('status')
+
+    if new_status == 'Done':
+        job.status = new_status
+        job.time_claimed = datetime.now().time().replace(microsecond=0)
+
+        # Subtract material used from corresponding filament inventory
+        filament = FilamentInventory.query.get(int(job.material_code))
+        if filament:
+            filament.weight_remaining = max(filament.weight_remaining - job.material_used, 0)
+
+        db.session.commit()
+        flash(f'{job.model_name} marked as Done and material usage recorded.', 'success')
+
+    elif new_status == 'Fail':
+        job.status = new_status
+        db.session.commit()
+        flash(f'{job.model_name} marked as Fail.', 'warning')
+
+    else:
+        flash('Invalid status update.', 'danger')
+
+    return redirect(url_for('views.dashboard'))
+

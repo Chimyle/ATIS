@@ -36,8 +36,18 @@ class LogPrintForm(FlaskForm):
     date_started = DateField('Date Started', format='%Y-%m-%d', default=date.today, validators=[DataRequired()])
     time_started = TimeField('Time Started', format='%H:%M', default=datetime.now().time, validators=[DataRequired()])
     model_name = StringField('Model Name', validators=[DataRequired()])
-    printer_id = SelectField('Printer', choices=[], validators=[DataRequired()])
-    material_id = SelectField('Material', choices=[], validators=[DataRequired()])
+    printer_id = SelectField('Printer', choices=[
+        ('Bambulab P1P', 'Bambulab P1P'),
+        ('Bambulab X1C', 'Bambulab X1C'),
+        ('Ender 3', 'Ender 3'),
+        ('Ender 3 Max', 'Ender 3 Max'),
+        ('Intamsys Low', 'Intamsys Low'),
+        ('Intamsys High', 'Intamsys High'),
+        ('Modix', 'Modix'),
+        ('Prusa Orange', 'Prusa Orange'),
+        ('Prusa Black', 'Prusa Black'),       
+        ('Ultimaker', 'Ultimaker')], validators=[DataRequired()])
+    material_code = SelectField('Material ID', coerce=str, validators=[DataRequired()])
     material_used = FloatField('Amount Used (g)', validators=[DataRequired()])
     print_duration = StringField('Print Duration (in minutes)', validators=[DataRequired()])
     layer_height = FloatField('Layer Height (mm)', validators=[Optional()])

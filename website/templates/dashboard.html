@@ -33,8 +33,10 @@ content %}
       <td>
         <form
           method="post"
-          action="{{ url_for('update_status', job_id=job.id) }}"
+          action="{{ url_for('views.update_status', job_id=job.id) }}"
         >
+          {{ log_print_form.hidden_tag() }}
+
           <button
             class="btn btn-success"
             name="status"
@@ -87,7 +89,7 @@ content %}
     <div class="modal-content">
       <form
         method="POST"
-        action="{{ url_for('views.log_print') }}"
+        action="{{ url_for('views.dashboard') }}"
       >
         {{ log_print_form.hidden_tag() }}
         <div class="modal-header">
@@ -122,8 +124,8 @@ content %}
               log_print_form.printer_id(class="form-control") }}
             </div>
             <div class="col-md-6">
-              {{ log_print_form.material_id.label }} {{
-              log_print_form.material_id(class="form-control") }}
+              {{ log_print_form.material_code.label }} {{
+              log_print_form.material_code(class="form-control") }}
             </div>
             <div class="col-md-6">
               {{ log_print_form.material_used.label }} {{

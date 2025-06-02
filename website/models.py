@@ -33,7 +33,7 @@ class PrintLog(db.Model):
     time_started = db.Column(db.Time, default=datetime.now().time)
     model_name = db.Column(db.String(100))
     printer_name = db.Column(db.String(50))
-    material_code = db.Column(db.String(20))
+    material_code = db.Column(db.String(50))
     material_used = db.Column(db.Float)
     duration = db.Column(db.Integer)
     layer_height = db.Column(db.Float)

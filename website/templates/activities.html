@@ -17,26 +17,49 @@ content %}
   <thead>
     <tr>
       <th onclick="sortTable(0)">Date</th>
-      <th onclick="sortTable(1)">Model</th>
-      <th>Printer</th>
+      <th onclick="sortTable(1)">Time Started</th>
+      <th onclick="sortTable(2)">Model</th>
+      <th onclick="sortTable(3)">Printer</th>
       <th>Material</th>
       <th>Used (g)</th>
       <th>Layer</th>
-      <th>Status</th>
+      <th>Nozzle Temp</th>
+      <th>Bed Temp</th>
+      <th>Chamber Temp</th>
+      <th onclick="sortTable(4)">Status</th>
       <th>Claimed</th>
+      <th>Action</th>
     </tr>
   </thead>
   <tbody>
     {% for log in logs %}
     <tr>
       <td>{{ log.date_started }}</td>
+      <td>{{ log.time_started }}</td>
       <td>{{ log.model_name }}</td>
       <td>{{ log.printer_name }}</td>
       <td>{{ log.material_code }}</td>
       <td>{{ log.material_used }}</td>
-      <td>{{ log.layer_height }}mm</td>
+      <td>{{ log.layer_height }}</td>
+      <td>{{ log.nozzle_temp }}°C</td>
+      <td>{{ log.bed_temp }}°C</td>
+      <td>{{ log.chamber_temp }}°C</td>
       <td>{{ log.status }}</td>
       <td>{{ log.time_claimed or '-' }}</td>
+      <td>
+        <form
+          method="POST"
+          action="{{ url_for('views.delete_log', log_id=log.id) }}"
+          onsubmit="return confirm('Are you sure you want to delete this log?');"
+        >
+          <button
+            type="submit"
+            class="btn btn-danger btn-sm"
+          >
+            Delete
+          </button>
+        </form>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
@@ -52,7 +75,7 @@ content %}
     <div class="modal-content">
       <form
         method="POST"
-        action="{{ url_for('views.log_print') }}"
+        action="{{ url_for('views.activities') }}"
       >
         {{ log_print_form.hidden_tag() }}
         <div class="modal-header">
@@ -87,8 +110,8 @@ content %}
               log_print_form.printer_id(class="form-control") }}
             </div>
             <div class="col-md-6">
-              {{ log_print_form.material_id.label }} {{
-              log_print_form.material_id(class="form-control") }}
+              {{ log_print_form.material_code.label }} {{
+              log_print_form.material_code(class="form-control") }}
             </div>
             <div class="col-md-6">
               {{ log_print_form.material_used.label }} {{
