@@ -1,5 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from datetime import date, datetime
+import pandas as pd
+from io import BytesIO
+from flask import send_file
 from .forms import LogPrintForm, AddFilamentForm, AddResinForm
 from .models import PrintLog, FilamentInventory, ResinInventory
 from .utils import generate_unique_code, generate_resin_code
@@ -181,3 +184,83 @@ def update_status(job_id):
 
     return redirect(url_for('views.dashboard'))
 
+@views.route('/export/inventory')
+def export_inventory():
+    # Query data
+    filaments = FilamentInventory.query.all()
+    resins = ResinInventory.query.all()
+
+    # Convert to list of dicts for pandas
+    filament_data = [{
+        'Code': f.code,
+        'Material': f.material,
+        'Color': f.color,
+        'Size': f.size,
+        'Weight Remaining (g)': f.weight_remaining,
+        'Location': f.location
+    } for f in filaments]
+
+    resin_data = [{
+        'Code': r.material_code,
+        'Material': r.material,
+        'Printer': r.printer,
+        'Manufactured': r.date_mfg,
+        'Expiry': r.date_expiry,
+        'Status': r.status
+    } for r in resins]
+
+    # Create dataframes
+    df_filament = pd.DataFrame(filament_data)
+    df_resin = pd.DataFrame(resin_data)
+
+    # Create Excel in memory
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df_filament.to_excel(writer, index=False, sheet_name='Filament')
+        df_resin.to_excel(writer, index=False, sheet_name='Resin')
+    output.seek(0)
+
+    # Send file to client
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name='inventory_export.xlsx'
+    )
+@views.route('/export/print_logs')
+def export_print_logs():
+    # Query all print logs
+    logs = PrintLog.query.all()
+
+    # Build list of dicts
+    log_data = [{
+        'Date Started': log.date_started,
+        'Time Started': log.time_started,
+        'Model Name': log.model_name,
+        'Printer': log.printer_name,
+        'Material Code': log.material_code,
+        'Material Used (g)': log.material_used,
+        'Duration (min)': log.duration,
+        'Layer Height': log.layer_height,
+        'Nozzle Temp (°C)': log.nozzle_temp,
+        'Bed Temp (°C)': log.bed_temp,
+        'Chamber Temp (°C)': log.chamber_temp,
+        'Status': log.status,
+        'Time Claimed': log.time_claimed
+    } for log in logs]
+
+    # Convert to DataFrame
+    df_logs = pd.DataFrame(log_data)
+
+    # Write to Excel in memory
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df_logs.to_excel(writer, index=False, sheet_name='Print Logs')
+    output.seek(0)
+
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name='print_logs_export.xlsx'
+    )

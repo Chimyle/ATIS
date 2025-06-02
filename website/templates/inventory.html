@@ -10,6 +10,14 @@ content %}
     Add Item
   </button>
 </div>
+<div class="d-flex justify-content-end mb-3">
+  <a
+    href="{{ url_for('views.export_inventory') }}"
+    class="btn btn-outline-success"
+  >
+    Export Inventory to Excel
+  </a>
+</div>
 <ul
   class="nav nav-tabs"
   id="inventoryTabs"
@@ -50,15 +58,20 @@ content %}
     class="tab-pane fade show active"
     id="filament-inventory"
   >
-    <table class="table table-bordered table-hover">
+    <table
+      id="filamentTable"
+      class="table table-bordered table-hover"
+    >
       <thead>
         <tr>
-          <th>Code</th>
-          <th>Material</th>
-          <th>Color</th>
-          <th>Size</th>
-          <th>Approx. Weight Remaining</th>
-          <th>Location</th>
+          <th onclick="sortTable('filamentTable', 0)">Code</th>
+          <th onclick="sortTable('filamentTable', 1)">Material</th>
+          <th onclick="sortTable('filamentTable', 2)">Color</th>
+          <th onclick="sortTable('filamentTable', 3)">Size</th>
+          <th onclick="sortTable('filamentTable', 4)">
+            Approx. Weight Remaining
+          </th>
+          <th onclick="sortTable('filamentTable', 5)">Location</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -94,14 +107,17 @@ content %}
     class="tab-pane fade"
     id="resin-inventory"
   >
-    <table class="table table-bordered table-hover">
+    <table
+      id="resinTable"
+      class="table table-bordered table-hover"
+    >
       <thead>
         <tr>
-          <th>Code</th>
-          <th>Material</th>
-          <th>Printer</th>
-          <th>Manufactured</th>
-          <th>Expiry</th>
+          <th onclick="sortTable('resinTable', 0)">Code</th>
+          <th onclick="sortTable('resinTable', 1)">Material</th>
+          <th onclick="sortTable('resinTable', 2)">Printer</th>
+          <th onclick="sortTable('resinTable', 3, true)">Manufactured</th>
+          <th onclick="sortTable('resinTable', 4, true)">Expiry</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>

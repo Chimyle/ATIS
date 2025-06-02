@@ -10,23 +10,31 @@ content %}
     Log Print
   </button>
 </div>
+<div class="d-flex justify-content-end mb-3">
+  <a
+    href="{{ url_for('views.export_print_logs') }}"
+    class="btn btn-outline-success"
+  >
+    Export Print Logs to Excel
+  </a>
+</div>
 <table
   class="table table-bordered"
   id="logTable"
 >
   <thead>
     <tr>
-      <th onclick="sortTable(0)">Date</th>
-      <th onclick="sortTable(1)">Time Started</th>
-      <th onclick="sortTable(2)">Model</th>
-      <th onclick="sortTable(3)">Printer</th>
+      <th onclick="sortTable('logTable', 0, true)">Date</th>
+      <th onclick="sortTable('logTable', 1)">Time Started</th>
+      <th onclick="sortTable('logTable', 2)">Model</th>
+      <th onclick="sortTable('logTable', 3)">Printer</th>
       <th>Material</th>
       <th>Used (g)</th>
       <th>Layer</th>
       <th>Nozzle Temp</th>
       <th>Bed Temp</th>
       <th>Chamber Temp</th>
-      <th onclick="sortTable(4)">Status</th>
+      <th onclick="sortTable('logTable', 10)">Status</th>
       <th>Claimed</th>
       <th>Action</th>
     </tr>
