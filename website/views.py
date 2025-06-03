@@ -6,7 +6,7 @@ from io import BytesIO
 from flask import send_file
 from .forms import LogPrintForm, AddFilamentForm, AddResinForm
 from .models import PrintLog, FilamentInventory, ResinInventory
-from .utils import generate_unique_code, generate_resin_code, generate_qr_with_label
+from .utils import generate_unique_code, generate_resin_code, generate_qr_with_label, populate_filament_choices, convert_mins
 from . import db
 
 views = Blueprint('views', __name__)
@@ -16,8 +16,8 @@ views = Blueprint('views', __name__)
 def dashboard():
     form = LogPrintForm()
     #logs = PrintLog.query.order_by(PrintLog.date_started.desc()).all()  # fetch all logs
-    fmatid = db.session.query(FilamentInventory.id, FilamentInventory.code).all()
-    form.material_code.choices = [(str(item.id), item.code) for item in fmatid]
+    populate_filament_choices(form)
+
 
     if form.validate_on_submit():
         new_log = PrintLog(
@@ -27,7 +27,7 @@ def dashboard():
             printer_name=form.printer_id.data,
             material_code=form.material_code.data,
             material_used=form.material_used.data,
-            duration=int(form.print_duration.data),
+            duration=convert_mins(form.print_duration.data),
             layer_height=form.layer_height.data,
             nozzle_temp=form.nozzle_temp.data,
             bed_temp=form.bed_temp.data,
@@ -106,8 +106,8 @@ def inventory():
 def activities():
     form = LogPrintForm()
     logs = PrintLog.query.order_by(PrintLog.date_started.desc()).all()  # fetch all logs
-    fmatid = db.session.query(FilamentInventory.id, FilamentInventory.code).all()
-    form.material_code.choices = [(str(item.id), item.code) for item in fmatid]
+    populate_filament_choices(form)
+
 
     if form.validate_on_submit():
         new_log = PrintLog(
@@ -117,7 +117,7 @@ def activities():
             printer_name=form.printer_id.data,
             material_code=form.material_code.data,
             material_used=form.material_used.data,
-            duration=int(form.print_duration.data),
+            duration=convert_mins(form.print_duration.data),
             layer_height=form.layer_height.data,
             nozzle_temp=form.nozzle_temp.data,
             bed_temp=form.bed_temp.data,
@@ -133,7 +133,7 @@ def activities():
 @views.route('/delete_filament/<int:item_id>', methods=['POST'])
 def delete_filament(item_id):
     item = FilamentInventory.query.get_or_404(item_id)
-    qr_path = os.path.join("static", "qr_codes", f"{item.code}.png")
+    qr_path = os.path.join(views.root_path, "static", "qr_codes", f"{item.code}.png")
     try:
         db.session.delete(item)
         db.session.commit()
@@ -189,12 +189,13 @@ def update_status(job_id):
         job.time_claimed = datetime.now().time().replace(microsecond=0)
 
         # Subtract material used from corresponding filament inventory
-        filament = FilamentInventory.query.get(int(job.material_code))
-        if filament:
-            filament.weight_remaining = max(filament.weight_remaining - job.material_used, 0)
+        if job.material_code:
+            filament = FilamentInventory.query.get(int(job.material_code))
+            if filament:
+                filament.weight_remaining = max(filament.weight_remaining - job.material_used, 0)
 
         db.session.commit()
-        flash(f'{job.model_name} marked as Done and material usage recorded.', 'success')
+        flash(f'{job.model_name} marked as Done.', 'success')
 
     elif new_status == 'Fail':
         job.status = new_status
@@ -247,7 +248,7 @@ def export_inventory():
         output,
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         as_attachment=True,
-        download_name='inventory_export.xlsx'
+        download_name=f'inventory_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
     )
 @views.route('/export/print_logs')
 def export_print_logs():
@@ -284,5 +285,5 @@ def export_print_logs():
         output,
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         as_attachment=True,
-        download_name='print_logs_export.xlsx'
+        download_name=f'print_logs_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
     )

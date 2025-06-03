@@ -10,7 +10,7 @@ class AddFilamentForm(FlaskForm):
     color = SelectField('Color', coerce=str, validators=[DataRequired()])
     new_color = StringField('New Color', validators=[Optional()])
     size = SelectField('Size', choices=[('1.75mm', '1.75mm'), ('2.85mm', '2.85mm')])
-    approx_weight = FloatField('Approx Weight (g)', validators=[DataRequired()])
+    approx_weight = FloatField('Approx Weight (g)', validators=[Optional()])
     quantity = IntegerField('Quantity', default=1, validators=[DataRequired()])
 
 
@@ -51,7 +51,7 @@ class LogPrintForm(FlaskForm):
         ('Ultimaker', 'Ultimaker')], validators=[DataRequired()])
     material_code = SelectField('Material ID', coerce=str, validators=[DataRequired()])
     material_used = FloatField('Amount Used (g)', validators=[DataRequired()])
-    print_duration = StringField('Print Duration (in minutes)', validators=[DataRequired()])
+    print_duration = StringField('Print Duration (HH:MM)', validators=[DataRequired()])
     layer_height = FloatField('Layer Height (mm)', validators=[Optional()])
     nozzle_temp = FloatField('Nozzle Temp (°C)', validators=[Optional()])
     bed_temp = FloatField('Bed Temp (°C)', validators=[Optional()])

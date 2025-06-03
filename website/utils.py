@@ -2,6 +2,7 @@ from .models import FilamentInventory, ResinInventory
 import qrcode
 from PIL import Image, ImageDraw, ImageFont
 import os
+from .models import db
 
 def shorten_color(color):
     color_map = {
@@ -16,6 +17,8 @@ def shorten_color(color):
         "Bone White": "BWe",
         "Natural": "Nl",
         "Clear": "Cl",
+        "Silver": "Sr",
+        "Pink": "Pk",
     }
     return color_map.get(color, color[:2].capitalize())
 
@@ -25,7 +28,7 @@ def get_size_code(size):
 def generate_unique_code(material, color, size):
     color_code = shorten_color(color)
     size_code = get_size_code(size)
-    base_code = f"{material}{color_code}{size_code}"
+    base_code = f"SB{color_code}{size_code}" if material=="SimuBone" else f"{material}{color_code}{size_code}"
 
     count = FilamentInventory.query.filter(FilamentInventory.code.like(f"{base_code}%")).count()
     control_number = f"{count + 1:02d}"
@@ -87,3 +90,14 @@ def generate_qr_with_label(material_code, save_dir="static/qr_codes", font_size=
     file_path = os.path.join(save_dir, f"{material_code}.png")
     img_with_text.save(file_path)
     return file_path
+
+def populate_filament_choices(form):
+    choices = db.session.query(FilamentInventory.id, FilamentInventory.code).all()
+    form.material_code.choices = [(str(item.id), item.code) for item in choices]
+
+def convert_mins(duration_str):
+    try:
+        hours, minutes = map(int, duration_str.split(':'))
+        return hours * 60 + minutes
+    except ValueError:
+        return None
