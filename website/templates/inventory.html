@@ -341,5 +341,15 @@ content %}
       });
     });
 </script>
-
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const hash = window.location.hash;
+    if (hash) {
+      const trigger = document.querySelector(`[data-bs-target="${hash}"]`);
+      if (trigger) {
+        bootstrap.Tab.getOrCreateInstance(trigger).show();
+      }
+    }
+  });
+</script>
 {% endblock %}

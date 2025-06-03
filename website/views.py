@@ -76,7 +76,8 @@ def inventory():
             #generate_qr_with_label(new_item.code)  # ← Generate QR after saving
         db.session.commit()
         flash("Filament added with QR code!", "success")
-        return redirect(url_for('views.inventory'))
+        tab = request.form.get('tab', 'filament-inventory')
+        return redirect(url_for('views.inventory') + f'#{tab}')
 
 
     elif resin_form.validate_on_submit():
@@ -96,7 +97,8 @@ def inventory():
             #generate_qr_with_label(new_item.material_code)  # ← Generate QR after saving
         db.session.commit()
         flash("Resin added with QR code!", "success")
-        return redirect(url_for('views.inventory'))
+        tab = request.form.get('tab', 'resin-inventory')
+        return redirect(url_for('views.inventory') + f'#{tab}')
 
     finv = FilamentInventory.query.all()
     rinv = ResinInventory.query.all()
@@ -149,7 +151,8 @@ def delete_filament(item_id):
         flash(f"Item deleted, but failed to remove QR code: {e}", "warning")
     else:
         flash("Item and QR code deleted successfully.", "success")
-    return redirect(url_for('views.inventory'))
+    return redirect(url_for('views.inventory') + '#filament-inventory')
+
 @views.route('/delete_resin/<int:item_id>', methods=['POST'])
 def delete_resin(item_id):
     item = ResinInventory.query.get_or_404(item_id)
@@ -169,7 +172,7 @@ def delete_resin(item_id):
         flash(f"Item deleted, but failed to remove QR code: {e}", "warning")
     else:
         flash("Item and QR code deleted successfully.", "success")
-    return redirect(url_for('views.inventory'))
+    return redirect(url_for('views.inventory') + '#resin-inventory')
 
 @views.route('/delete_log/<int:log_id>', methods=['POST'])
 def delete_log(log_id):
