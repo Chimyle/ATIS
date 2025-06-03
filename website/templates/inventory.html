@@ -86,19 +86,34 @@ content %}
             <td>{{ item.size }}</td>
             <td>{{ item.weight_remaining }}g</td>
             <td>{{ item.location }}</td>
-            <td>
-              <form
-                method="POST"
-                action="{{ url_for('views.delete_filament', item_id=item.id) }}"
-                onsubmit="return confirm('Are you sure you want to delete this item?');"
+            <td class="text-center">
+              <div
+                class="d-flex justify-content-center align-items-center gap-2"
               >
-                <button
-                  type="submit"
-                  class="btn btn-danger btn-sm"
+                <form
+                  method="GET"
+                  action="{{ url_for('views.download_qr', code=item.code) }}"
                 >
-                  Delete
-                </button>
-              </form>
+                  <button
+                    type="submit"
+                    class="btn btn-success btn-sm"
+                  >
+                    Save QR
+                  </button>
+                </form>
+                <form
+                  method="POST"
+                  action="{{ url_for('views.delete_filament', item_id=item.id) }}"
+                  onsubmit="return confirm('Are you sure you want to delete this item?');"
+                >
+                  <button
+                    type="submit"
+                    class="btn btn-danger btn-sm"
+                  >
+                    Delete
+                  </button>
+                </form>
+              </div>
             </td>
           </tr>
           {% endfor %}
@@ -135,19 +150,34 @@ content %}
             <td>{{ item.date_mfg }}</td>
             <td>{{ item.date_expiry }}</td>
             <td>{{ item.status }}</td>
-            <td>
-              <form
-                method="POST"
-                action="{{ url_for('views.delete_resin', item_id=item.id) }}"
-                onsubmit="return confirm('Are you sure you want to delete this item?');"
+            <td class="text-center">
+              <div
+                class="d-flex justify-content-center align-items-center gap-2"
               >
-                <button
-                  type="submit"
-                  class="btn btn-danger btn-sm"
+                <form
+                  method="GET"
+                  action="{{ url_for('views.download_qr', code=item.material_code) }}"
                 >
-                  Delete
-                </button>
-              </form>
+                  <button
+                    type="submit"
+                    class="btn btn-success btn-sm"
+                  >
+                    Save QR
+                  </button>
+                </form>
+                <form
+                  method="POST"
+                  action="{{ url_for('views.delete_resin', item_id=item.id) }}"
+                  onsubmit="return confirm('Are you sure you want to delete this item?');"
+                >
+                  <button
+                    type="submit"
+                    class="btn btn-danger btn-sm"
+                  >
+                    Delete
+                  </button>
+                </form>
+              </div>
             </td>
           </tr>
           {% endfor %}

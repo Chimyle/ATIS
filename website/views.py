@@ -73,7 +73,7 @@ def inventory():
                 weight_remaining=filament_form.approx_weight.data
             )
             db.session.add(new_item)
-            generate_qr_with_label(new_item.code)  # ← Generate QR after saving
+            #generate_qr_with_label(new_item.code)  # ← Generate QR after saving
         db.session.commit()
         flash("Filament added with QR code!", "success")
         return redirect(url_for('views.inventory'))
@@ -93,7 +93,7 @@ def inventory():
                 status=resin_form.status.data if resin_form.status.data else 'Sealed',
             )
             db.session.add(new_item)
-            generate_qr_with_label(new_item.material_code)  # ← Generate QR after saving
+            #generate_qr_with_label(new_item.material_code)  # ← Generate QR after saving
         db.session.commit()
         flash("Resin added with QR code!", "success")
         return redirect(url_for('views.inventory'))
@@ -286,4 +286,14 @@ def export_print_logs():
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         as_attachment=True,
         download_name=f'print_logs_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+    )
+
+@views.route('/download_qr/<string:code>')
+def download_qr(code):
+    img_io = generate_qr_with_label(code)
+    return send_file(
+        img_io,
+        mimetype='image/png',
+        as_attachment=True,
+        download_name=f'{code}.png'
     )

@@ -1,4 +1,5 @@
 from .models import FilamentInventory, ResinInventory
+from io import BytesIO
 import qrcode
 from PIL import Image, ImageDraw, ImageFont
 import os
@@ -39,10 +40,8 @@ def generate_resin_code(material):
     count = ResinInventory.query.count()
     return f"{base}{count + 1:02d}"
 
-def generate_qr_with_label(material_code, save_dir="static/qr_codes", font_size=20):
-    os.makedirs(save_dir, exist_ok=True)
-
-    # Generate QR code image
+def generate_qr_with_label(material_code, font_size=20):
+    # Generate QR code
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -53,28 +52,25 @@ def generate_qr_with_label(material_code, save_dir="static/qr_codes", font_size=
     qr.make(fit=True)
     img_qr = qr.make_image(fill_color="black", back_color="white").convert('RGB')
 
-    # Load TrueType font
+    # Load font
     try:
-        font = ImageFont.truetype("arial.ttf", font_size)  # Customize path if needed
+        font = ImageFont.truetype("arial.ttf", font_size)
     except IOError:
         font = ImageFont.load_default()
-        print("Could not load TrueType font, using default.")
 
-    # Measure text size
+    # Measure text
     bbox = font.getbbox(material_code)
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
 
-    # Add spacing above and below text
+    # Layout sizes
     spacing_above_text = 5
-    spacing_below_text = 15  # More space for cutting room
-
-    # Create new image with space for label
+    spacing_below_text = 15
     qr_width, qr_height = img_qr.size
     total_height = qr_height + spacing_above_text + text_height + spacing_below_text
-    img_with_text = Image.new("RGB", (qr_width, total_height), "white")
 
-    # Paste QR code on new image
+    # Create image
+    img_with_text = Image.new("RGB", (qr_width, total_height), "white")
     img_with_text.paste(img_qr, (0, 0))
 
     # Draw text and border
@@ -82,14 +78,14 @@ def generate_qr_with_label(material_code, save_dir="static/qr_codes", font_size=
     text_x = (qr_width - text_width) // 2
     text_y = qr_height + spacing_above_text
     draw.text((text_x, text_y), material_code, font=font, fill="black")
-
-    # Draw rectangle around everything
     draw.rectangle([0, 0, qr_width - 1, total_height - 1], outline="black", width=2)
 
-    # Save
-    file_path = os.path.join(save_dir, f"{material_code}.png")
-    img_with_text.save(file_path)
-    return file_path
+    # Save to memory
+    img_io = BytesIO()
+    img_with_text.save(img_io, 'PNG')
+    img_io.seek(0)
+
+    return img_io
 
 def populate_filament_choices(form):
     choices = db.session.query(FilamentInventory.id, FilamentInventory.code).all()
