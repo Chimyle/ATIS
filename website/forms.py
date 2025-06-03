@@ -17,10 +17,12 @@ class AddFilamentForm(FlaskForm):
 class AddResinForm(FlaskForm):
     material = SelectField('Material', coerce=str, validators=[DataRequired()])
     new_material = StringField('New Material', validators=[Optional()])
-    printer = StringField('Printer', validators=[DataRequired()])
-    date_mfg = DateField('Date of Manufacture', validators=[DataRequired()])
-    date_expiry = DateField('Date of Expiry', validators=[DataRequired()])
-    date_delivered = DateField('Date Delivered', validators=[DataRequired()])
+    printer = SelectField('Printer', choices=[
+        ('Formlabs', 'Formlabs'),       
+        ('Phrozen', 'Phrozen')], validators=[DataRequired()])
+    date_mfg = DateField('Date of Manufacture', validators=[Optional()])
+    date_expiry = DateField('Date of Expiry', validators=[Optional()])
+    date_delivered = DateField('Date Delivered', validators=[Optional()])
     status = SelectField('Status', choices=[
         ('Sealed', 'Sealed'),
         ('Opened', 'Opened'),
