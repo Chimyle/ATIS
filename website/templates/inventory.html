@@ -59,6 +59,13 @@ content %}
     class="tab-pane fade show active"
     id="filament-inventory"
   >
+    <input
+      type="text"
+      id="filamentSearchInput"
+      class="form-control mb-3"
+      placeholder="Search filament inventory..."
+    />
+
     <div class="table-responsive">
       <table
         id="filamentTable"
@@ -125,6 +132,13 @@ content %}
     class="tab-pane fade"
     id="resin-inventory"
   >
+    <input
+      type="text"
+      id="resinSearchInput"
+      class="form-control mb-3"
+      placeholder="Search resin inventory..."
+    />
+
     <div class="table-responsive">
       <table
         id="resinTable"
@@ -299,6 +313,33 @@ content %}
       }
     });
   });
+</script>
+<script>
+  // Filter Filament Table
+  document
+    .getElementById("filamentSearchInput")
+    .addEventListener("keyup", function () {
+      const filter = this.value.toLowerCase();
+      const rows = document.querySelectorAll("#filamentTable tbody tr");
+
+      rows.forEach((row) => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+      });
+    });
+
+  // Filter Resin Table
+  document
+    .getElementById("resinSearchInput")
+    .addEventListener("keyup", function () {
+      const filter = this.value.toLowerCase();
+      const rows = document.querySelectorAll("#resinTable tbody tr");
+
+      rows.forEach((row) => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+      });
+    });
 </script>
 
 {% endblock %}
