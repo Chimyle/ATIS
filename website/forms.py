@@ -5,9 +5,28 @@ from datetime import date, datetime
 
 # Form to add inventory items
 class AddFilamentForm(FlaskForm):
-    material = SelectField('Material', coerce=str, validators=[DataRequired()])
+    material = SelectField('Material', coerce=str, choices=[
+        ('PLA+', 'PLA+'),
+        ('PLA', 'PLA'),
+        ('PETG', 'PETG'),
+        ('TPU', 'TPU'),
+        ('ABS', 'ABS'),
+        ('Simubone', 'Simubone')], validators=[DataRequired()])
     new_material = StringField('New Material', validators=[Optional()])
-    color = SelectField('Color', coerce=str, validators=[DataRequired()])
+    color = SelectField('Color', coerce=str,  choices=[
+        ('Black', 'Black'),
+        ('White', 'White'),
+        ('Red', 'Red'), 
+        ('Blue', 'Blue'), 
+        ('Green', 'Green'), 
+        ('Yellow', 'Yellow'), 
+        ('Gray', 'Gray'), 
+        ('Orange', 'Orange'), 
+        ('Bone White', 'Bone White'), 
+        ('Natural', 'Natural'), 
+        ('Clear', 'Clear'), 
+        ('Silver', 'Silver'), 
+        ('Pink', 'Pink')], validators=[DataRequired()])
     new_color = StringField('New Color', validators=[Optional()])
     size = SelectField('Size', choices=[('1.75mm', '1.75mm'), ('2.85mm', '2.85mm')])
     approx_weight = FloatField('Approx Weight (g)', validators=[Optional()])

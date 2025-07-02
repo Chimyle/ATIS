@@ -6,7 +6,7 @@ from io import BytesIO
 from flask import send_file
 from .forms import LogPrintForm, AddFilamentForm, AddResinForm
 from .models import PrintLog, FilamentInventory, ResinInventory
-from .utils import generate_unique_code, generate_resin_code, generate_qr_with_label, populate_filament_choices, convert_mins
+from .utils import generate_unique_code, generate_resin_code, generate_qr_with_label, populate_filament_choices, convert_mins, update_choices
 from . import db
 
 views = Blueprint('views', __name__)
@@ -56,8 +56,8 @@ def inventory():
     rmat = db.session.query(ResinInventory.material).distinct().all()
     rmat = [m[0] for m in rmat]
 
-    filament_form.material.choices = [(m, m) for m in fmat] + [("__new__", "Add New")]
-    filament_form.color.choices = [(c, c) for c in fcol] + [("__new__", "Add New")]
+    update_choices(filament_form.material, fmat)
+    update_choices(filament_form.color, fcol)
     resin_form.material.choices = [(m, m) for m in rmat] + [("__new__", "Add New")]
 
     if filament_form.validate_on_submit():

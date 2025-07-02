@@ -97,3 +97,8 @@ def convert_mins(duration_str):
         return hours * 60 + minutes
     except ValueError:
         return None
+def update_choices(field, items):
+    existing = {v for v, _ in field.choices}
+    field.choices += [(i, i) for i in items if i not in existing]
+    if "__new__" not in existing:
+        field.choices.append(("__new__", "Add New"))
