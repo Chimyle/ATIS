@@ -6,7 +6,7 @@ from io import BytesIO
 from flask import send_file
 from .forms import LogPrintForm, AddFilamentForm, AddResinForm
 from .models import PrintLog, FilamentInventory, ResinInventory
-from .utils import generate_unique_code, generate_resin_code, generate_qr_with_label, populate_filament_choices, convert_mins, update_choices
+from .utils import generate_unique_code, generate_resin_code, generate_qr_with_label, populate_filament_choices, convert_mins, update_choices, import_filaments_from_excel, import_resins_from_excel
 from . import db
 
 views = Blueprint('views', __name__)
@@ -300,3 +300,25 @@ def download_qr(code):
         as_attachment=True,
         download_name=f'{code}.png'
     )
+
+@views.route('/import-inventory', methods=['GET', 'POST'])
+def import_inventory():
+    if request.method == 'POST':
+        file = request.files.get('file')
+        if not file or not file.filename.endswith(('.xlsx', '.xls')):
+            flash('Invalid file format', 'danger')
+            return redirect(request.url)
+
+        filepath = os.path.join('/tmp', secure_filename(file.filename))
+        file.save(filepath)
+
+        try:
+            import_filaments_from_excel(filepath)
+            import_resins_from_excel(filepath)
+            flash("Inventory imported successfully!", "success")
+        except Exception as e:
+            flash(f"Error importing file: {e}", "danger")
+
+        return redirect(request.url)
+
+    return render_template('import_inventory.html')

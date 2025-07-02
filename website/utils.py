@@ -3,7 +3,9 @@ from io import BytesIO
 import qrcode
 from PIL import Image, ImageDraw, ImageFont
 import os
-from .models import db
+from .models import db, FilamentInventory, ResinInventory
+import pandas as pd
+from datetime import datetime
 
 def shorten_color(color):
     color_map = {
@@ -102,3 +104,61 @@ def update_choices(field, items):
     field.choices += [(i, i) for i in items if i not in existing]
     if "__new__" not in existing:
         field.choices.append(("__new__", "Add New"))
+def import_filaments_from_excel(file_path):
+    df = pd.read_excel(file_path, sheet_name="Filaments", header=1)
+
+    for _, row in df.iterrows():
+        code = str(row.get("Item ID")).strip()
+        if not code or FilamentInventory.query.filter_by(code=code).first():
+            continue  # skip if code missing or already exists
+
+        material = str(row.get("Material")).strip()
+        color = str(row.get("Color")).strip()
+        size = str(row.get("Diameter")).strip()
+        location = str(row.get("Location")).strip() if pd.notna(row.get("Location")) else "Shelf"
+
+        filament = FilamentInventory(
+            code=code,
+            material=material,
+            color=color,
+            size=size,
+            weight_remaining=1000.0,
+            location=location
+        )
+        db.session.add(filament)
+    
+    db.session.commit()
+
+
+def import_resins_from_excel(file_path):
+    df = pd.read_excel(file_path, sheet_name="Resins", header=1)
+
+    for _, row in df.iterrows():
+        material_code = str(row.get("Material Code")).strip()
+        if not material_code or ResinInventory.query.filter_by(material_code=material_code).first():
+            continue  # skip if missing or exists
+
+        def parse_date(val):
+            if pd.isna(val):
+                return None
+            if isinstance(val, datetime):
+                return val.date()
+            try:
+                return pd.to_datetime(val).date()
+            except Exception:
+                return None
+
+        resin = ResinInventory(
+            material=str(row.get("Material")).strip(),
+            material_code=material_code,
+            printer=str(row.get("Printer")).strip(),
+            date_mfg=parse_date(row.get("Date of Mfg")),
+            date_expiry=parse_date(row.get("Date of Expiry")),
+            date_delivered=parse_date(row.get("Date Delivered")),
+            date_opened=parse_date(row.get("Date Opened")),
+            status=str(row.get("status")).strip() if pd.notna(row.get("status")) else None,
+            location="Shelf"
+        )
+        db.session.add(resin)
+    
+    db.session.commit()
