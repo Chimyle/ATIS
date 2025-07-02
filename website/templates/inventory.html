@@ -67,7 +67,7 @@ content %}
       <button
         class="btn btn-success"
         data-bs-toggle="modal"
-        data-bs-target="#addItemModal"
+        data-bs-target="#addFilamentModal"
         style="white-space: nowrap; height: 100%;"
       >
         Add Item
@@ -149,7 +149,7 @@ content %}
       <button
         class="btn btn-success"
         data-bs-toggle="modal"
-        data-bs-target="#addItemModal"
+        data-bs-target="#addResinModal"
         style="white-space: nowrap; height: 100%;"
       >
         Add Item
@@ -217,98 +217,38 @@ content %}
     </div>
   </div>
 </div>
-<div
-  class="modal fade"
-  id="addItemModal"
-  tabindex="-1"
-  aria-labelledby="addItemModalLabel"
-  aria-hidden="true"
->
+<div class="modal fade" id="addFilamentModal" tabindex="-1" aria-labelledby="addFilamentModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5
-          class="modal-title"
-          id="addItemModalLabel"
-        >
-          Add Inventory Item
-        </h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-        ></button>
+        <h5 class="modal-title" id="addFilamentModalLabel">Add Filament Item</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <ul
-          class="nav nav-tabs"
-          id="formTabs"
-          role="tablist"
-        >
-          <li
-            class="nav-item"
-            role="presentation"
-          >
-            <button
-              class="nav-link active"
-              id="filament-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#filament-form"
-              type="button"
-              role="tab"
-            >
-              Filament
-            </button>
-          </li>
-          <li
-            class="nav-item"
-            role="presentation"
-          >
-            <button
-              class="nav-link"
-              id="resin-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#resin-form"
-              type="button"
-              role="tab"
-            >
-              Resin
-            </button>
-          </li>
-        </ul>
-        <div class="tab-content pt-3">
-          <div
-            class="tab-pane fade show active"
-            id="filament-form"
-            role="tabpanel"
-          >
-            <form
-              method="POST"
-              action="{{ url_for('views.inventory') }}"
-            >
-              {{ filament_form.hidden_tag() }} {% include
-              'partials/filament_form_fields.html' %}
-            </form>
-          </div>
-          <div
-            class="tab-pane fade"
-            id="resin-form"
-            role="tabpanel"
-          >
-            <form
-              method="POST"
-              action="{{ url_for('views.inventory') }}"
-            >
-              {{ resin_form.hidden_tag() }} {% include
-              'partials/resin_form_fields.html' %}
-            </form>
-          </div>
-        </div>
+        <form method="POST" action="{{ url_for('views.inventory') }}">
+          {{ filament_form.hidden_tag() }}
+          {% include 'partials/filament_form_fields.html' %}
+        </form>
       </div>
     </div>
   </div>
 </div>
-
+<div class="modal fade" id="addResinModal" tabindex="-1" aria-labelledby="addResinModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addResinModalLabel">Add Resin Item</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="{{ url_for('views.inventory') }}">
+          {{ resin_form.hidden_tag() }}
+          {% include 'partials/resin_form_fields.html' %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const toggles = [
