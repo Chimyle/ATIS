@@ -11,7 +11,7 @@ class FilamentInventory(db.Model):
     size = db.Column(db.String(5), nullable=True)
     weight_remaining = db.Column(db.Float, nullable=True)
     qr_filename = db.Column(db.String(100))
-    location = db.Column(db.String(100), default='Shelf')
+    location = db.Column(db.String(100), default='Black Shelf')
 
 class ResinInventory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -24,7 +24,7 @@ class ResinInventory(db.Model):
     date_opened = db.Column(db.Date, nullable=True)
     status = db.Column(db.String(50), nullable=True)
     qr_filename = db.Column(db.String(100))
-    location = db.Column(db.String(100), default='Shelf')
+    location = db.Column(db.String(100), default='Black Shelf')
 
 
 class PrintLog(db.Model):

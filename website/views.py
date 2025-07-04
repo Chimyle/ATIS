@@ -8,6 +8,7 @@ from .forms import LogPrintForm, AddFilamentForm, AddResinForm
 from .models import PrintLog, FilamentInventory, ResinInventory
 from .utils import generate_unique_code, generate_resin_code, generate_qr_with_label, populate_filament_choices, convert_mins, update_choices, import_filaments_from_excel, import_resins_from_excel
 from . import db
+from werkzeug.utils import secure_filename
 
 views = Blueprint('views', __name__)
 
@@ -232,7 +233,10 @@ def export_inventory():
         'Printer': r.printer,
         'Manufactured': r.date_mfg,
         'Expiry': r.date_expiry,
-        'Status': r.status
+        'Delivered': r.date_delivered,
+        'Opened': r.date_opened,
+        'Status': r.status,
+        'Location': r.location
     } for r in resins]
 
     # Create dataframes
@@ -251,7 +255,7 @@ def export_inventory():
         output,
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         as_attachment=True,
-        download_name=f'inventory_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+        download_name=f'inventory_export_{datetime.now().strftime("%Y-%m-%d_%H-%M")}.xlsx'
     )
 @views.route('/export/print_logs')
 def export_print_logs():

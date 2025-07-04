@@ -22,6 +22,11 @@ def shorten_color(color):
         "Clear": "Cl",
         "Silver": "Sr",
         "Pink": "Pk",
+        "Fire Engine Red": "FERD",
+        "Transparent": "Tt",
+        "Light Gray": "LGy",
+        "Dark Gray": "DGy",
+        "Cold White": "CWe",
     }
     return color_map.get(color, color[:2].capitalize())
 
@@ -31,15 +36,33 @@ def get_size_code(size):
 def generate_unique_code(material, color, size):
     color_code = shorten_color(color)
     size_code = get_size_code(size)
-    base_code = f"SB{color_code}{size_code}" if material=="SimuBone" else f"{material}{color_code}{size_code}"
+    if material == "ePLA+HS":
+        base_code = f"PLA+{color_code}{size_code}"
+    elif material == "SimuBone":
+        base_code = f"SB{color_code}{size_code}"
+    elif material == "Nylon":
+        base_code = f"Nyl{color_code}{size_code}"
+    elif material == "PolyDissolve":
+        base_code = f"PD{color_code}{size_code}"
+    elif material == "PolyFlex TPU 95" or material == "Ultimaker TPU":
+        base_code = f"TPU{color_code}{size_code}"
+    elif material == "Polylite PLA" or material == "PolyTerra PLA":
+        base_code = f"PLA{color_code}{size_code}"
+    elif material == "Thermax PEEK":
+        base_code = f"PEEK{color_code}{size_code}"
+    elif material == "Tough PLA":
+        base_code = f"TPLA{color_code}{size_code}"
+    else:
+        base_code = f"{material}{color_code}{size_code}"
+
 
     count = FilamentInventory.query.filter(FilamentInventory.code.like(f"{base_code}%")).count()
     control_number = f"{count + 1:02d}"
     return f"{base_code}{control_number}"
 
 def generate_resin_code(material):
-    base = material[:3].upper()
-    count = ResinInventory.query.count()
+    base = material[:2].upper()
+    count = ResinInventory.query.filter(ResinInventory.material_code.like(f"{base}%")).count()
     return f"{base}{count + 1:02d}"
 
 def generate_qr_with_label(material_code, font_size=20):
@@ -108,6 +131,9 @@ def import_filaments_from_excel(file_path):
     df = pd.read_excel(file_path, sheet_name="Filaments", header=1)
 
     for _, row in df.iterrows():
+        status = str(row.get("status") or row.get("Status") or "").strip().lower()
+        if status == "consumed":
+            continue 
         code = str(row.get("Item ID")).strip()
         if not code or FilamentInventory.query.filter_by(code=code).first():
             continue  # skip if code missing or already exists
@@ -134,7 +160,11 @@ def import_resins_from_excel(file_path):
     df = pd.read_excel(file_path, sheet_name="Resins", header=1)
 
     for _, row in df.iterrows():
-        material_code = str(row.get("Material Code")).strip()
+        status = str(row.get("status") or row.get("Status") or "").strip().lower()
+        if status == "consumed":
+            continue 
+
+        material_code = str(row.get("Stock ID")).strip()
         if not material_code or ResinInventory.query.filter_by(material_code=material_code).first():
             continue  # skip if missing or exists
 
