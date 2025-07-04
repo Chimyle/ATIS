@@ -54,7 +54,7 @@
   </head>
 
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success px-3">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success px-3" style="position: fixed; top: 0; width: 100%;">
       <button
         class="navbar-toggler"
         type="button"
@@ -166,5 +166,16 @@
         }
       }, 2000);
     </script>
+
+    <script>
+      function adjustBodyPadding() {
+        const navbar = document.querySelector('.navbar');
+        document.body.style.paddingTop = navbar.offsetHeight + 'px';
+      }
+
+      window.addEventListener("DOMContentLoaded", adjustBodyPadding);
+      window.addEventListener("resize", adjustBodyPadding);
+    </script>
+
   </body>
 </html>
